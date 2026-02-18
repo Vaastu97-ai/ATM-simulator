@@ -89,20 +89,132 @@
   </div>
 
   <script>
-    // ===== STATE =====
+    // ================= STATE =================
     let balance = 0;
     let pin = "";
     let chances = 3;
 
-    // ===== LOAD FROM localStorage =====
+    // ================= LOAD SAVED DATA =================
     window.onload = function () {
-      const savedBalance = localStorage.getItem("atm_balance");
-      const savedPin = localStorage.getItem("atm_pin");
-      const savedChances = localStorage.getItem("atm_chances");
+      try {
+        const savedBalance = localStorage.getItem("atm_balance");
+        const savedPin = localStorage.getItem("atm_pin");
+        const savedChances = localStorage.getItem("atm_chances");
 
-      if (savedBalance !== null && savedPin !== null) {
-        balance = parseInt(savedBalance);
-        pin = savedPin;
-        chances = savedChances ? parseInt(savedChances) : 3;
+        if (savedBalance !== null && savedPin !== null) {
+          balance = parseInt(savedBalance) || 0;
+          pin = savedPin;
+          chances = savedChances ? parseInt(savedChances) : 3;
 
-        document.getElementById("setup").cla
+          document.getElementById("setup").classList.add("hidden");
+          document.getElementById("login").classList.remove("hidden");
+        }
+      } catch (e) {
+        console.error("localStorage load error:", e);
+      }
+    };
+
+    // ================= SAVE HELPER =================
+    function saveData() {
+      localStorage.setItem("atm_balance", balance);
+      localStorage.setItem("atm_pin", pin);
+      localStorage.setItem("atm_chances", chances);
+    }
+
+    // ================= ACCOUNT SETUP =================
+    function setupAccount() {
+      const balInput = document.getElementById("initialBalance").value.trim();
+      const pinInput = document.getElementById("setPin").value.trim();
+
+      if (balInput === "" || pinInput === "") {
+        alert("Please enter balance and PIN");
+        return;
+      }
+
+      const balNum = Number(balInput);
+      if (isNaN(balNum) || balNum < 0) {
+        alert("Enter a valid balance");
+        return;
+      }
+
+      balance = balNum;
+      pin = pinInput;
+      chances = 3;
+      saveData();
+
+      document.getElementById("setup").classList.add("hidden");
+      document.getElementById("login").classList.remove("hidden");
+    }
+
+    // ================= PIN VERIFY =================
+    function verifyPin() {
+      const entered = document.getElementById("enterPin").value.trim();
+      const msg = document.getElementById("loginMsg");
+
+      if (entered === "") {
+        msg.textContent = "Enter PIN first";
+        return;
+      }
+
+      if (entered === pin) {
+        msg.textContent = "PIN correct ✅";
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("menu").classList.remove("hidden");
+      } else {
+        chances--;
+        saveData();
+        msg.textContent = `Incorrect PIN! Attempts left: ${chances}`;
+
+        if (chances <= 0) {
+          msg.textContent = "Account blocked 🚫";
+          document.querySelector("#login button").disabled = true;
+        }
+      }
+    }
+
+    // ================= ATM FUNCTIONS =================
+    function checkBalance() {
+      document.getElementById("menuMsg").textContent = `Balance: ₹${balance}`;
+    }
+
+    function depositMoney() {
+      const amt = prompt("Enter amount to deposit:");
+      if (amt === null) return;
+
+      const num = Number(amt);
+      if (isNaN(num) || num <= 0) {
+        alert("Enter valid deposit amount");
+        return;
+      }
+
+      balance += num;
+      saveData();
+      document.getElementById("menuMsg").textContent = `Deposited! New balance: ₹${balance}`;
+    }
+
+    function withdrawMoney() {
+      const amt = prompt("Enter amount to withdraw:");
+      if (amt === null) return;
+
+      const num = Number(amt);
+      if (isNaN(num) || num <= 0) {
+        alert("Enter valid withdraw amount");
+        return;
+      }
+
+      if (num > balance) {
+        document.getElementById("menuMsg").textContent = "Insufficient funds ❌";
+        return;
+      }
+
+      balance -= num;
+      saveData();
+      document.getElementById("menuMsg").textContent = `Withdrawn! Remaining balance: ₹${balance}`;
+    }
+
+    function exitATM() {
+      document.getElementById("menuMsg").textContent = "Thank you for using the ATM 🙏";
+    }
+  </script>
+</body>
+</html>
