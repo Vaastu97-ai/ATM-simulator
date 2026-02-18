@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATM Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #111827;
+      padding: 30px;
+      border-radius: 16px;
+      width: 340px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+    }
+
+    input {
+      background: #1f2937;
+      color: white;
+    }
+
+    button {
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #16a34a;
+    }
+
+    .menu button {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .menu button:hover {
+      background: #2563eb;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .message {
+      margin-top: 10px;
+      min-height: 20px;
+      color: #facc15;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏧 ATM Simulator</h1>
+
+    <!-- Setup Section -->
+    <div id="setup">
+      <input type="number" id="initialBalance" placeholder="Enter initial balance" />
+      <input type="password" id="setPin" placeholder="Set your PIN" />
+      <button onclick="setupAccount()">Create Account</button>
+    </div>
+
+    <!-- Login Section -->
+    <div id="login" class="hidden">
+      <input type="password" id="enterPin" placeholder="Enter PIN" />
+      <button onclick="verifyPin()">Login</button>
+      <div class="message" id="loginMsg"></div>
+    </div>
+
+    <!-- Menu Section -->
+    <div id="menu" class="hidden menu">
+      <button onclick="checkBalance()">Check Balance</button>
+      <button onclick="depositMoney()">Deposit Money</button>
+      <button onclick="withdrawMoney()">Withdraw Money</button>
+      <button onclick="exitATM()">Exit</button>
+      <div class="message" id="menuMsg"></div>
+    </div>
+  </div>
+
+  <script>
+    let balance = 0;
+    let pin = "";
+    let chances = 3;
+
+    function setupAccount() {
+      const balInput = document.getElementById("initialBalance").value;
+      const pinInput = document.getElementById("setPin").value;
+
+      if (balInput === "" || pinInput === "") {
+        alert("Please enter balance and PIN");
+        return;
+      }
+
+      balance = parseInt(balInput);
+      pin = pinInput;
+
+      document.getElementById("setup").classList.add("hidden");
+      document.getElementById("login").classList.remove("hidden");
+    }
+
+    function verifyPin() {
+      const entered = document.getElementById("enterPin").value;
+      const msg = document.getElementById("loginMsg");
+
+      if (entered === pin) {
+        msg.textContent = "PIN correct ✅";
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("menu").classList.remove("hidden");
+      } else {
+        chances--;
+        msg.textContent = `Incorrect PIN! Attempts left: ${chances}`;
+        if (chances === 0) {
+          msg.textContent = "Account blocked 🚫";
+          document.querySelector("#login button").disabled = true;
+        }
+      }
+    }
+
+    function checkBalance() {
+      document.getElementById("menuMsg").textContent = `Balance: ₹${balance}`;
+    }
+
+    function depositMoney() {
+      const amt = prompt("Enter amount to deposit:");
+      if (!amt) return;
+      balance += parseInt(amt);
+      document.getElementById("menuMsg").textContent = `Deposited! New balance: ₹${balance}`;
+    }
+
+    function withdrawMoney() {
+      const amt = prompt("Enter amount to withdraw:");
+      if (!amt) return;
+      const num = parseInt(amt);
+
+      if (num > balance) {
+        document.getElementById("menuMsg").textContent = "Insufficient funds ❌";
+      } else {
+        balance -= num;
+        document.getElementById("menuMsg").textContent = `Withdrawn! Remaining balance: ₹${balance}`;
+      }
+    }
+
+    function exitATM() {
+      document.getElementById("menuMsg").textContent = "Thank you for using the ATM 🙏";
+    }
+  </script>
+</body>
+</html>
