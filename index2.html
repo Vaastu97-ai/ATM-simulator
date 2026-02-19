@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0f172a;
+      background: linear-gradient(135deg, #0f172a, #020617);
       color: white;
       display: flex;
       justify-content: center;
@@ -17,19 +17,22 @@
     }
 
     .container {
-      background: #111827;
+      backdrop-filter: blur(14px);
+      background: rgba(17, 24, 39, 0.75);
       padding: 24px;
-      border-radius: 16px;
-      width: 360px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      border-radius: 20px;
+      width: 380px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
       text-align: center;
     }
 
+    h1 { margin-top: 0; }
+
     input, button {
       width: 100%;
-      padding: 10px;
+      padding: 11px;
       margin: 8px 0;
-      border-radius: 8px;
+      border-radius: 10px;
       border: none;
       font-size: 14px;
     }
@@ -41,12 +44,12 @@
       color: black;
       font-weight: bold;
       cursor: pointer;
+      transition: 0.2s ease;
     }
 
-    button:hover { background: #16a34a; }
+    button:hover { transform: translateY(-1px); }
 
     .menu button { background: #3b82f6; color: white; }
-    .menu button:hover { background: #2563eb; }
 
     .hidden { display: none; }
 
@@ -67,10 +70,36 @@
       padding: 4px 0;
       border-bottom: 1px solid #1f2937;
     }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .toggle {
+      cursor: pointer;
+      font-size: 12px;
+      background: #111827;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 420px) {
+      .container { width: 92%; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="topbar">
+      <span>🔐 Secure Mode</span>
+      <span class="toggle" onclick="toggleTheme()">🌙 Toggle</span>
+    </div>
+
     <h1>🏧 ATM Simulator</h1>
 
     <!-- Setup Section -->
@@ -93,9 +122,8 @@
       <button onclick="depositMoney()">Deposit Money</button>
       <button onclick="withdrawMoney()">Withdraw Money</button>
       <button onclick="clearHistory()">Clear History</button>
-      <button onclick="exitATM()">Exit</button>
+      <button onclick="logoutATM()">Logout</button>
       <div class="message" id="menuMsg"></div>
-
       <div class="history" id="historyBox"></div>
     </div>
   </div>
@@ -106,6 +134,18 @@
     let pin = "";
     let chances = 3;
     let history = [];
+
+    // ================= THEME =================
+    function toggleTheme() {
+      document.body.classList.toggle("light");
+      if (document.body.classList.contains("light")) {
+        document.body.style.background = "linear-gradient(135deg,#e5e7eb,#9ca3af)";
+        document.body.style.color = "black";
+      } else {
+        document.body.style.background = "linear-gradient(135deg,#0f172a,#020617)";
+        document.body.style.color = "white";
+      }
+    }
 
     // ================= LOAD SAVED DATA =================
     window.onload = function () {
@@ -140,7 +180,7 @@
     function addHistory(text) {
       const time = new Date().toLocaleTimeString();
       history.unshift(`[${time}] ${text}`);
-      if (history.length > 20) history.pop();
+      if (history.length > 25) history.pop();
       saveData();
       renderHistory();
     }
@@ -255,8 +295,10 @@
       addHistory(`Withdrew ₹${num}`);
     }
 
-    function exitATM() {
-      document.getElementById("menuMsg").textContent = "Thank you for using the ATM 🙏";
+    function logoutATM() {
+      document.getElementById("menu").classList.add("hidden");
+      document.getElementById("login").classList.remove("hidden");
+      document.getElementById("menuMsg").textContent = "Logged out";
     }
   </script>
 </body>
