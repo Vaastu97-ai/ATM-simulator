@@ -18,9 +18,9 @@
 
     .container {
       background: #111827;
-      padding: 30px;
+      padding: 24px;
       border-radius: 16px;
-      width: 340px;
+      width: 360px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.4);
       text-align: center;
     }
@@ -34,10 +34,7 @@
       font-size: 14px;
     }
 
-    input {
-      background: #1f2937;
-      color: white;
-    }
+    input { background: #1f2937; color: white; }
 
     button {
       background: #22c55e;
@@ -53,10 +50,22 @@
 
     .hidden { display: none; }
 
-    .message {
-      margin-top: 10px;
-      min-height: 20px;
-      color: #facc15;
+    .message { margin-top: 10px; min-height: 20px; color: #facc15; }
+
+    .history {
+      background: #0b1220;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 12px;
+      max-height: 140px;
+      overflow-y: auto;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .history div {
+      padding: 4px 0;
+      border-bottom: 1px solid #1f2937;
     }
   </style>
 </head>
@@ -83,8 +92,11 @@
       <button onclick="checkBalance()">Check Balance</button>
       <button onclick="depositMoney()">Deposit Money</button>
       <button onclick="withdrawMoney()">Withdraw Money</button>
+      <button onclick="clearHistory()">Clear History</button>
       <button onclick="exitATM()">Exit</button>
       <div class="message" id="menuMsg"></div>
+
+      <div class="history" id="historyBox"></div>
     </div>
   </div>
 
@@ -93,6 +105,7 @@
     let balance = 0;
     let pin = "";
     let chances = 3;
+    let history = [];
 
     // ================= LOAD SAVED DATA =================
     window.onload = function () {
@@ -100,11 +113,13 @@
         const savedBalance = localStorage.getItem("atm_balance");
         const savedPin = localStorage.getItem("atm_pin");
         const savedChances = localStorage.getItem("atm_chances");
+        const savedHistory = localStorage.getItem("atm_history");
 
         if (savedBalance !== null && savedPin !== null) {
           balance = parseInt(savedBalance) || 0;
           pin = savedPin;
           chances = savedChances ? parseInt(savedChances) : 3;
+          history = savedHistory ? JSON.parse(savedHistory) : [];
 
           document.getElementById("setup").classList.add("hidden");
           document.getElementById("login").classList.remove("hidden");
@@ -119,6 +134,28 @@
       localStorage.setItem("atm_balance", balance);
       localStorage.setItem("atm_pin", pin);
       localStorage.setItem("atm_chances", chances);
+      localStorage.setItem("atm_history", JSON.stringify(history));
+    }
+
+    function addHistory(text) {
+      const time = new Date().toLocaleTimeString();
+      history.unshift(`[${time}] ${text}`);
+      if (history.length > 20) history.pop();
+      saveData();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const box = document.getElementById("historyBox");
+      box.innerHTML = history.length
+        ? history.map(item => `<div>${item}</div>`).join("")
+        : "<div>No transactions yet</div>";
+    }
+
+    function clearHistory() {
+      history = [];
+      saveData();
+      renderHistory();
     }
 
     // ================= ACCOUNT SETUP =================
@@ -126,7 +163,7 @@
       const balInput = document.getElementById("initialBalance").value.trim();
       const pinInput = document.getElementById("setPin").value.trim();
 
-      if (balInput === "" || pinInput === "") {
+      if (!balInput || !pinInput) {
         alert("Please enter balance and PIN");
         return;
       }
@@ -140,6 +177,7 @@
       balance = balNum;
       pin = pinInput;
       chances = 3;
+      history = [];
       saveData();
 
       document.getElementById("setup").classList.add("hidden");
@@ -151,7 +189,7 @@
       const entered = document.getElementById("enterPin").value.trim();
       const msg = document.getElementById("loginMsg");
 
-      if (entered === "") {
+      if (!entered) {
         msg.textContent = "Enter PIN first";
         return;
       }
@@ -160,6 +198,7 @@
         msg.textContent = "PIN correct ✅";
         document.getElementById("login").classList.add("hidden");
         document.getElementById("menu").classList.remove("hidden");
+        renderHistory();
       } else {
         chances--;
         saveData();
@@ -175,6 +214,7 @@
     // ================= ATM FUNCTIONS =================
     function checkBalance() {
       document.getElementById("menuMsg").textContent = `Balance: ₹${balance}`;
+      addHistory(`Checked balance → ₹${balance}`);
     }
 
     function depositMoney() {
@@ -190,6 +230,7 @@
       balance += num;
       saveData();
       document.getElementById("menuMsg").textContent = `Deposited! New balance: ₹${balance}`;
+      addHistory(`Deposited ₹${num}`);
     }
 
     function withdrawMoney() {
@@ -204,12 +245,14 @@
 
       if (num > balance) {
         document.getElementById("menuMsg").textContent = "Insufficient funds ❌";
+        addHistory(`Failed withdrawal ₹${num}`);
         return;
       }
 
       balance -= num;
       saveData();
       document.getElementById("menuMsg").textContent = `Withdrawn! Remaining balance: ₹${balance}`;
+      addHistory(`Withdrew ₹${num}`);
     }
 
     function exitATM() {
