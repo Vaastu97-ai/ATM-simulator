@@ -1,7 +1,7 @@
-<h1 align="center">🏧 ATM Simulator — Level 1</h1>
+<h1 align="center">🏧 ATM Simulator — Progressive Web Project</h1>
 
 <p align="center">
-A browser-based ATM Simulator built using <b>HTML, CSS, and JavaScript</b> with persistent storage using <code>localStorage</code>.
+An interactive ATM Simulator built using <b>HTML, CSS, and JavaScript</b>, developed in multiple levels with continuous feature upgrades.
 </p>
 
 <hr>
@@ -14,31 +14,70 @@ A browser-based ATM Simulator built using <b>HTML, CSS, and JavaScript</b> with 
 
 <hr>
 
-<h2>✨ Features</h2>
-<ul>
-  <li>🔐 PIN-based authentication</li>
-  <li>💰 Check account balance</li>
-  <li>➕ Deposit money</li>
-  <li>➖ Withdraw money</li>
-  <li>🚫 Account blocking after 3 wrong attempts</li>
-  <li>💾 Data persistence using <b>localStorage</b></li>
-  <li>🖥️ Menu-driven interface</li>
-  <li>⚡ Instant browser-based execution</li>
-</ul>
+<h2>📌 Project Evolution</h2>
+<p>
+This project was developed step-by-step to simulate real-world software improvement.
+Each level introduces more realistic ATM behavior and better user experience.
+</p>
 
 <hr>
 
-<h2>🆕 Level 1 Improvements</h2>
-<p>Compared to the basic version:</p>
+<h2>🥇 Level 1 — Core ATM with Persistence</h2>
+
+<h3>✅ Features</h3>
 <ul>
-  <li>✅ Balance saved after refresh</li>
-  <li>✅ PIN stored locally</li>
-  <li>✅ Login state preserved</li>
-  <li>✅ Basic input safety checks</li>
-  <li>✅ Better user flow</li>
+  <li>🔐 PIN-based authentication</li>
+  <li>💰 Check balance</li>
+  <li>➕ Deposit money</li>
+  <li>➖ Withdraw money</li>
+  <li>🚫 Account blocking after 3 wrong attempts</li>
+  <li>💾 Data saved using <b>localStorage</b></li>
+  <li>🛡️ Basic input validation</li>
 </ul>
 
-<p><b>This makes the project behave more like a real ATM.</b></p>
+<h3>🎯 Impact</h3>
+<p>
+Converted the project from a temporary demo into a persistent browser application.
+</p>
+
+<hr>
+
+<h2>🥈 Level 2 — Transaction Intelligence</h2>
+
+<h3>🆕 Upgrades Added</h3>
+<ul>
+  <li>🧾 Transaction history panel</li>
+  <li>⏱️ Timestamped activity logs</li>
+  <li>💾 History persistence using localStorage</li>
+  <li>🧹 Clear history feature</li>
+  <li>📊 Real-time history rendering</li>
+</ul>
+
+<h3>🎯 Why This Matters</h3>
+<p>
+This level introduces <b>state tracking</b> similar to real banking systems.
+The application now remembers user activity, not just balance.
+</p>
+
+<hr>
+
+<h2>🥉 Level 3 — Professional UI & UX</h2>
+
+<h3>🆕 Major Enhancements</h3>
+<ul>
+  <li>🎨 Glassmorphism modern interface</li>
+  <li>🌙 Light/Dark theme toggle</li>
+  <li>🔓 Proper logout functionality</li>
+  <li>📱 Improved mobile responsiveness</li>
+  <li>✨ Smooth button interactions</li>
+  <li>🧭 Top status bar (Secure Mode)</li>
+</ul>
+
+<h3>🎯 Why Level 3 Is Important</h3>
+<p>
+This upgrade focuses on <b>production-quality user experience</b>.
+The project now demonstrates both functionality and professional UI design.
+</p>
 
 <hr>
 
@@ -47,7 +86,7 @@ A browser-based ATM Simulator built using <b>HTML, CSS, and JavaScript</b> with 
   <li>HTML5</li>
   <li>CSS3</li>
   <li>JavaScript (Vanilla)</li>
-  <li>Browser localStorage</li>
+  <li>Browser localStorage API</li>
 </ul>
 
 <hr>
@@ -62,52 +101,39 @@ atm-simulator/
 
 <hr>
 
-<h2>▶️ How to Run Locally</h2>
+<h2>▶️ How to Run</h2>
 
 <ol>
-  <li>Download or clone the repository</li>
+  <li>Clone the repository</li>
 </ol>
 
 <pre><code>git clone https://github.com/YOUR-USERNAME/atm-simulator.git</code></pre>
 
 <ol start="2">
-  <li>Open the project folder</li>
-  <li>Double-click <code>index.html</code></li>
+  <li>Open the folder</li>
+  <li>Run <code>index.html</code> in your browser</li>
 </ol>
 
 <p>✅ No installation required.</p>
 
 <hr>
 
-<h2>🖥️ How It Works</h2>
-<ol>
-  <li>User creates account with balance and PIN</li>
-  <li>System stores data in <b>localStorage</b></li>
-  <li>User logs in using PIN</li>
-  <li>User performs ATM operations</li>
-  <li>Data persists even after page refresh</li>
-</ol>
-
-<hr>
-
-<h2>⚠️ Limitations</h2>
+<h2>⚠️ Current Limitations</h2>
 <ul>
-  <li>❌ Not secure for real banking use</li>
-  <li>❌ Single user only</li>
-  <li>❌ PIN stored in plain text (demo purpose)</li>
-  <li>❌ No transaction history yet</li>
+  <li>❌ Single-user system</li>
+  <li>❌ PIN stored in plain text (demo only)</li>
+  <li>❌ No backend/database</li>
 </ul>
 
 <hr>
 
-<h2>🔮 Future Improvements</h2>
+<h2>🔮 Future Roadmap (Level 4+)</h2>
 <ul>
-  <li>🔐 Encrypt PIN</li>
-  <li>🧾 Add transaction history</li>
-  <li>📱 Improve mobile responsiveness</li>
-  <li>🎨 Modern UI upgrade</li>
-  <li>👥 Multi-user support</li>
-  <li>🌙 Dark/light mode</li>
+  <li>👥 Multi-user accounts</li>
+  <li>🔐 Encrypted PIN storage</li>
+  <li>📊 Balance analytics chart</li>
+  <li>🔔 ATM sound effects</li>
+  <li>☁️ Backend integration (Firebase/Node)</li>
 </ul>
 
 <hr>
