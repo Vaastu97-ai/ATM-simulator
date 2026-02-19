@@ -3,30 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ATM Simulator</title>
+  <title>ATM Simulator — Final Level</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #020617);
+      background: linear-gradient(135deg,#0f172a,#020617);
       color: white;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
+      transition: 0.3s ease;
+    }
+
+    body.light {
+      background: linear-gradient(135deg,#e5e7eb,#9ca3af);
+      color: black;
     }
 
     .container {
       backdrop-filter: blur(14px);
-      background: rgba(17, 24, 39, 0.75);
+      background: rgba(17,24,39,0.75);
       padding: 24px;
       border-radius: 20px;
-      width: 380px;
+      width: 390px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
       text-align: center;
     }
-
-    h1 { margin-top: 0; }
 
     input, button {
       width: 100%;
@@ -37,268 +41,164 @@
       font-size: 14px;
     }
 
-    input { background: #1f2937; color: white; }
+    input { background:#1f2937; color:white; }
 
     button {
-      background: #22c55e;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s ease;
+      background:#22c55e;
+      color:black;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.2s ease;
     }
 
-    button:hover { transform: translateY(-1px); }
+    button:hover { transform:translateY(-1px); }
 
-    .menu button { background: #3b82f6; color: white; }
-
-    .hidden { display: none; }
-
-    .message { margin-top: 10px; min-height: 20px; color: #facc15; }
+    .menu button { background:#3b82f6; color:white; }
+    .hidden { display:none; }
 
     .history {
-      background: #0b1220;
-      border-radius: 10px;
-      padding: 10px;
-      margin-top: 12px;
-      max-height: 140px;
-      overflow-y: auto;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .history div {
-      padding: 4px 0;
-      border-bottom: 1px solid #1f2937;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-      font-size: 13px;
-      opacity: 0.9;
+      background:#0b1220;
+      border-radius:10px;
+      padding:10px;
+      margin-top:12px;
+      max-height:140px;
+      overflow-y:auto;
+      text-align:left;
+      font-size:13px;
     }
 
     .toggle {
-      cursor: pointer;
-      font-size: 12px;
-      background: #111827;
-      padding: 4px 8px;
-      border-radius: 6px;
+      cursor:pointer;
+      font-size:12px;
+      background:#111827;
+      padding:4px 8px;
+      border-radius:6px;
+      margin-bottom:6px;
+      display:inline-block;
     }
 
-    @media (max-width: 420px) {
-      .container { width: 92%; }
-    }
+    @media (max-width:420px){ .container{width:92%;} }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="topbar">
-      <span>🔐 Secure Mode</span>
-      <span class="toggle" onclick="toggleTheme()">🌙 Toggle</span>
-    </div>
-
+    <div class="toggle" onclick="toggleTheme()">🌙 Toggle Theme</div>
     <h1>🏧 ATM Simulator</h1>
 
-    <!-- Setup Section -->
-    <div id="setup">
-      <input type="number" id="initialBalance" placeholder="Enter initial balance" />
-      <input type="password" id="setPin" placeholder="Set your PIN" />
-      <button onclick="setupAccount()">Create Account</button>
+    <!-- REGISTER -->
+    <div id="register">
+      <input id="username" placeholder="Create username" />
+      <input type="password" id="setPin" placeholder="Set PIN" />
+      <input type="number" id="initialBalance" placeholder="Initial balance" />
+      <button onclick="registerUser()">Register</button>
     </div>
 
-    <!-- Login Section -->
+    <!-- LOGIN -->
     <div id="login" class="hidden">
-      <input type="password" id="enterPin" placeholder="Enter PIN" />
-      <button onclick="verifyPin()">Login</button>
-      <div class="message" id="loginMsg"></div>
+      <input id="loginUser" placeholder="Username" />
+      <input type="password" id="enterPin" placeholder="PIN" />
+      <button onclick="loginUserFunc()">Login</button>
+      <div id="loginMsg"></div>
     </div>
 
-    <!-- Menu Section -->
+    <!-- MENU -->
     <div id="menu" class="hidden menu">
       <button onclick="checkBalance()">Check Balance</button>
-      <button onclick="depositMoney()">Deposit Money</button>
-      <button onclick="withdrawMoney()">Withdraw Money</button>
+      <button onclick="depositMoney()">Deposit</button>
+      <button onclick="withdrawMoney()">Withdraw</button>
       <button onclick="clearHistory()">Clear History</button>
-      <button onclick="logoutATM()">Logout</button>
-      <div class="message" id="menuMsg"></div>
+      <button onclick="logout()">Logout</button>
+      <div id="menuMsg"></div>
       <div class="history" id="historyBox"></div>
     </div>
   </div>
 
   <script>
-    // ================= STATE =================
-    let balance = 0;
-    let pin = "";
-    let chances = 3;
-    let history = [];
+    // ===== GLOBAL STATE =====
+    let currentUser = null;
+    let users = JSON.parse(localStorage.getItem("atm_users") || "{}");
 
-    // ================= THEME =================
-    function toggleTheme() {
-      document.body.classList.toggle("light");
-      if (document.body.classList.contains("light")) {
-        document.body.style.background = "linear-gradient(135deg,#e5e7eb,#9ca3af)";
-        document.body.style.color = "black";
-      } else {
-        document.body.style.background = "linear-gradient(135deg,#0f172a,#020617)";
-        document.body.style.color = "white";
-      }
+    // ===== THEME =====
+    function toggleTheme(){ document.body.classList.toggle("light"); }
+
+    // ===== SAVE USERS =====
+    function saveUsers(){ localStorage.setItem("atm_users", JSON.stringify(users)); }
+
+    // ===== REGISTER =====
+    function registerUser(){
+      const u = username.value.trim();
+      const p = setPin.value.trim();
+      const b = Number(initialBalance.value);
+
+      if(!u||!p||isNaN(b)||b<0){ alert("Enter valid details"); return; }
+      if(users[u]){ alert("User already exists"); return; }
+
+      users[u]={ pin:p, balance:b, history:[] };
+      saveUsers();
+      alert("Registered successfully");
+
+      register.classList.add("hidden");
+      login.classList.remove("hidden");
     }
 
-    // ================= LOAD SAVED DATA =================
-    window.onload = function () {
-      try {
-        const savedBalance = localStorage.getItem("atm_balance");
-        const savedPin = localStorage.getItem("atm_pin");
-        const savedChances = localStorage.getItem("atm_chances");
-        const savedHistory = localStorage.getItem("atm_history");
-
-        if (savedBalance !== null && savedPin !== null) {
-          balance = parseInt(savedBalance) || 0;
-          pin = savedPin;
-          chances = savedChances ? parseInt(savedChances) : 3;
-          history = savedHistory ? JSON.parse(savedHistory) : [];
-
-          document.getElementById("setup").classList.add("hidden");
-          document.getElementById("login").classList.remove("hidden");
-        }
-      } catch (e) {
-        console.error("localStorage load error:", e);
-      }
-    };
-
-    // ================= SAVE HELPER =================
-    function saveData() {
-      localStorage.setItem("atm_balance", balance);
-      localStorage.setItem("atm_pin", pin);
-      localStorage.setItem("atm_chances", chances);
-      localStorage.setItem("atm_history", JSON.stringify(history));
-    }
-
-    function addHistory(text) {
-      const time = new Date().toLocaleTimeString();
-      history.unshift(`[${time}] ${text}`);
-      if (history.length > 25) history.pop();
-      saveData();
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const box = document.getElementById("historyBox");
-      box.innerHTML = history.length
-        ? history.map(item => `<div>${item}</div>`).join("")
-        : "<div>No transactions yet</div>";
-    }
-
-    function clearHistory() {
-      history = [];
-      saveData();
-      renderHistory();
-    }
-
-    // ================= ACCOUNT SETUP =================
-    function setupAccount() {
-      const balInput = document.getElementById("initialBalance").value.trim();
-      const pinInput = document.getElementById("setPin").value.trim();
-
-      if (!balInput || !pinInput) {
-        alert("Please enter balance and PIN");
-        return;
-      }
-
-      const balNum = Number(balInput);
-      if (isNaN(balNum) || balNum < 0) {
-        alert("Enter a valid balance");
-        return;
-      }
-
-      balance = balNum;
-      pin = pinInput;
-      chances = 3;
-      history = [];
-      saveData();
-
-      document.getElementById("setup").classList.add("hidden");
-      document.getElementById("login").classList.remove("hidden");
-    }
-
-    // ================= PIN VERIFY =================
-    function verifyPin() {
-      const entered = document.getElementById("enterPin").value.trim();
+    // ===== LOGIN =====
+    function loginUserFunc(){
+      const u = loginUser.value.trim();
+      const p = enterPin.value.trim();
       const msg = document.getElementById("loginMsg");
 
-      if (!entered) {
-        msg.textContent = "Enter PIN first";
-        return;
-      }
+      if(!users[u]){ msg.textContent="User not found"; return; }
+      if(users[u].pin!==p){ msg.textContent="Wrong PIN"; return; }
 
-      if (entered === pin) {
-        msg.textContent = "PIN correct ✅";
-        document.getElementById("login").classList.add("hidden");
-        document.getElementById("menu").classList.remove("hidden");
-        renderHistory();
-      } else {
-        chances--;
-        saveData();
-        msg.textContent = `Incorrect PIN! Attempts left: ${chances}`;
-
-        if (chances <= 0) {
-          msg.textContent = "Account blocked 🚫";
-          document.querySelector("#login button").disabled = true;
-        }
-      }
+      currentUser=u;
+      login.classList.add("hidden");
+      menu.classList.remove("hidden");
+      renderHistory();
     }
 
-    // ================= ATM FUNCTIONS =================
-    function checkBalance() {
-      document.getElementById("menuMsg").textContent = `Balance: ₹${balance}`;
-      addHistory(`Checked balance → ₹${balance}`);
+    // ===== HISTORY =====
+    function addHistory(text){
+      const t=new Date().toLocaleTimeString();
+      users[currentUser].history.unshift(`[${t}] ${text}`);
+      if(users[currentUser].history.length>25) users[currentUser].history.pop();
+      saveUsers();
+      renderHistory();
     }
 
-    function depositMoney() {
-      const amt = prompt("Enter amount to deposit:");
-      if (amt === null) return;
-
-      const num = Number(amt);
-      if (isNaN(num) || num <= 0) {
-        alert("Enter valid deposit amount");
-        return;
-      }
-
-      balance += num;
-      saveData();
-      document.getElementById("menuMsg").textContent = `Deposited! New balance: ₹${balance}`;
-      addHistory(`Deposited ₹${num}`);
+    function renderHistory(){
+      const h=users[currentUser].history;
+      historyBox.innerHTML=h.length? h.map(x=>`<div>${x}</div>`).join("") : "<div>No transactions</div>";
     }
 
-    function withdrawMoney() {
-      const amt = prompt("Enter amount to withdraw:");
-      if (amt === null) return;
+    function clearHistory(){ users[currentUser].history=[]; saveUsers(); renderHistory(); }
 
-      const num = Number(amt);
-      if (isNaN(num) || num <= 0) {
-        alert("Enter valid withdraw amount");
-        return;
-      }
-
-      if (num > balance) {
-        document.getElementById("menuMsg").textContent = "Insufficient funds ❌";
-        addHistory(`Failed withdrawal ₹${num}`);
-        return;
-      }
-
-      balance -= num;
-      saveData();
-      document.getElementById("menuMsg").textContent = `Withdrawn! Remaining balance: ₹${balance}`;
-      addHistory(`Withdrew ₹${num}`);
+    // ===== ATM OPS =====
+    function checkBalance(){
+      menuMsg.textContent=`Balance: ₹${users[currentUser].balance}`;
+      addHistory(`Checked balance`);
     }
 
-    function logoutATM() {
-      document.getElementById("menu").classList.add("hidden");
-      document.getElementById("login").classList.remove("hidden");
-      document.getElementById("menuMsg").textContent = "Logged out";
+    function depositMoney(){
+      const a=Number(prompt("Deposit amount:"));
+      if(isNaN(a)||a<=0) return alert("Invalid amount");
+      users[currentUser].balance+=a; saveUsers();
+      menuMsg.textContent=`Deposited ₹${a}`;
+      addHistory(`Deposited ₹${a}`);
+    }
+
+    function withdrawMoney(){
+      const a=Number(prompt("Withdraw amount:"));
+      if(isNaN(a)||a<=0) return alert("Invalid amount");
+      if(a>users[currentUser].balance) return alert("Insufficient funds");
+      users[currentUser].balance-=a; saveUsers();
+      menuMsg.textContent=`Withdrew ₹${a}`;
+      addHistory(`Withdrew ₹${a}`);
+    }
+
+    function logout(){
+      currentUser=null;
+      menu.classList.add("hidden");
+      login.classList.remove("hidden");
     }
   </script>
 </body>
