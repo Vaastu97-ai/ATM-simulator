@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ATM Simulator — Final Level</title>
+  <title>ATM Simulator — Pro Max+</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg,#0f172a,#020617);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617);
       color: white;
       display: flex;
       justify-content: center;
@@ -23,20 +23,22 @@
     }
 
     .container {
-      backdrop-filter: blur(14px);
-      background: rgba(17,24,39,0.75);
-      padding: 24px;
-      border-radius: 20px;
-      width: 390px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      backdrop-filter: blur(18px);
+      background: rgba(17,24,39,0.82);
+      padding: 26px;
+      border-radius: 24px;
+      width: 410px;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.65);
       text-align: center;
     }
 
+    h1 { margin-top: 4px; letter-spacing: 0.5px; }
+
     input, button {
       width: 100%;
-      padding: 11px;
+      padding: 12px;
       margin: 8px 0;
-      border-radius: 10px;
+      border-radius: 12px;
       border: none;
       font-size: 14px;
     }
@@ -44,48 +46,53 @@
     input { background:#1f2937; color:white; }
 
     button {
-      background:#22c55e;
-      color:black;
-      font-weight:bold;
-      cursor:pointer;
-      transition:0.2s ease;
+      background: linear-gradient(135deg,#22c55e,#16a34a);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.25s ease;
     }
 
-    button:hover { transform:translateY(-1px); }
+    button:hover { transform: translateY(-2px) scale(1.02); }
 
-    .menu button { background:#3b82f6; color:white; }
+    .menu button { background: linear-gradient(135deg,#3b82f6,#2563eb); }
     .hidden { display:none; }
 
     .history {
       background:#0b1220;
-      border-radius:10px;
+      border-radius:12px;
       padding:10px;
       margin-top:12px;
-      max-height:140px;
+      max-height:160px;
       overflow-y:auto;
       text-align:left;
       font-size:13px;
+    }
+
+    .limits {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 6px;
     }
 
     .toggle {
       cursor:pointer;
       font-size:12px;
       background:#111827;
-      padding:4px 8px;
-      border-radius:6px;
-      margin-bottom:6px;
+      padding:5px 9px;
+      border-radius:8px;
+      margin-bottom:8px;
       display:inline-block;
     }
 
-    @media (max-width:420px){ .container{width:92%;} }
+    @media (max-width:420px){ .container{width:95%;} }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="toggle" onclick="toggleTheme()">🌙 Toggle Theme</div>
-    <h1>🏧 ATM Simulator</h1>
+    <h1>🏧 ATM Pro Max+</h1>
 
-    <!-- REGISTER -->
     <div id="register">
       <input id="username" placeholder="Create username" />
       <input type="password" id="setPin" placeholder="Set PIN" />
@@ -93,7 +100,6 @@
       <button onclick="registerUser()">Register</button>
     </div>
 
-    <!-- LOGIN -->
     <div id="login" class="hidden">
       <input id="loginUser" placeholder="Username" />
       <input type="password" id="enterPin" placeholder="PIN" />
@@ -101,68 +107,65 @@
       <div id="loginMsg"></div>
     </div>
 
-    <!-- MENU -->
     <div id="menu" class="hidden menu">
       <button onclick="checkBalance()">Check Balance</button>
       <button onclick="depositMoney()">Deposit</button>
       <button onclick="withdrawMoney()">Withdraw</button>
       <button onclick="clearHistory()">Clear History</button>
+      <button onclick="exportData()">Export Data</button>
       <button onclick="logout()">Logout</button>
       <div id="menuMsg"></div>
+      <div class="limits">Min Deposit: ₹100 | Max Deposit: ₹50,000<br>Min Withdraw: ₹100 | Max Withdraw: ₹20,000</div>
       <div class="history" id="historyBox"></div>
     </div>
   </div>
 
   <script>
-    // ===== GLOBAL STATE =====
-    let currentUser = null;
-    let users = JSON.parse(localStorage.getItem("atm_users") || "{}");
+    // ===== LIMITS =====
+    const MIN_DEPOSIT = 100;
+    const MAX_DEPOSIT = 50000;
+    const MIN_WITHDRAW = 100;
+    const MAX_WITHDRAW = 20000;
 
-    // ===== THEME =====
+    function hashPin(pin){ let h=0; for(let c of pin){ h=(h<<5)-h+c.charCodeAt(0); h|=0;} return h.toString(); }
+
+    let currentUser=null;
+    let users=JSON.parse(localStorage.getItem("atm_users")||"{}");
+
     function toggleTheme(){ document.body.classList.toggle("light"); }
+    function saveUsers(){ localStorage.setItem("atm_users",JSON.stringify(users)); }
 
-    // ===== SAVE USERS =====
-    function saveUsers(){ localStorage.setItem("atm_users", JSON.stringify(users)); }
-
-    // ===== REGISTER =====
     function registerUser(){
-      const u = username.value.trim();
-      const p = setPin.value.trim();
-      const b = Number(initialBalance.value);
-
-      if(!u||!p||isNaN(b)||b<0){ alert("Enter valid details"); return; }
-      if(users[u]){ alert("User already exists"); return; }
-
-      users[u]={ pin:p, balance:b, history:[] };
+      const u=username.value.trim();
+      const p=setPin.value.trim();
+      const b=Number(initialBalance.value);
+      if(!u||!p||isNaN(b)||b<0) return alert("Enter valid details");
+      if(users[u]) return alert("User exists");
+      users[u]={ pin:hashPin(p), balance:b, history:[] };
       saveUsers();
-      alert("Registered successfully");
-
-      register.classList.add("hidden");
-      login.classList.remove("hidden");
+      register.classList.add("hidden"); login.classList.remove("hidden");
     }
 
-    // ===== LOGIN =====
     function loginUserFunc(){
-      const u = loginUser.value.trim();
-      const p = enterPin.value.trim();
-      const msg = document.getElementById("loginMsg");
-
-      if(!users[u]){ msg.textContent="User not found"; return; }
-      if(users[u].pin!==p){ msg.textContent="Wrong PIN"; return; }
-
+      const u=loginUser.value.trim();
+      const p=enterPin.value.trim();
+      if(!users[u]) return loginMsg.textContent="User not found";
+      if(users[u].pin!==hashPin(p)) return loginMsg.textContent="Wrong PIN";
       currentUser=u;
-      login.classList.add("hidden");
-      menu.classList.remove("hidden");
-      renderHistory();
+      sessionStorage.setItem("atm_session",u);
+      login.classList.add("hidden"); menu.classList.remove("hidden"); renderHistory();
     }
 
-    // ===== HISTORY =====
-    function addHistory(text){
-      const t=new Date().toLocaleTimeString();
-      users[currentUser].history.unshift(`[${t}] ${text}`);
-      if(users[currentUser].history.length>25) users[currentUser].history.pop();
-      saveUsers();
-      renderHistory();
+    window.onload=function(){
+      const s=sessionStorage.getItem("atm_session");
+      if(s&&users[s]){ currentUser=s; register.classList.add("hidden"); login.classList.add("hidden"); menu.classList.remove("hidden"); renderHistory(); }
+    }
+
+    function addHistory(t){
+      const time=new Date().toLocaleTimeString();
+      users[currentUser].history.unshift(`[${time}] ${t}`);
+      if(users[currentUser].history.length>30) users[currentUser].history.pop();
+      saveUsers(); renderHistory();
     }
 
     function renderHistory(){
@@ -172,34 +175,33 @@
 
     function clearHistory(){ users[currentUser].history=[]; saveUsers(); renderHistory(); }
 
-    // ===== ATM OPS =====
-    function checkBalance(){
-      menuMsg.textContent=`Balance: ₹${users[currentUser].balance}`;
-      addHistory(`Checked balance`);
-    }
+    function checkBalance(){ menuMsg.textContent=`Balance: ₹${users[currentUser].balance}`; addHistory("Checked balance"); }
 
     function depositMoney(){
-      const a=Number(prompt("Deposit amount:"));
-      if(isNaN(a)||a<=0) return alert("Invalid amount");
+      const a=Number(prompt(`Deposit amount (₹${MIN_DEPOSIT}-₹${MAX_DEPOSIT}):`));
+      if(isNaN(a)||a<MIN_DEPOSIT||a>MAX_DEPOSIT) return alert("Deposit outside allowed limits");
       users[currentUser].balance+=a; saveUsers();
-      menuMsg.textContent=`Deposited ₹${a}`;
-      addHistory(`Deposited ₹${a}`);
+      menuMsg.textContent=`Deposited ₹${a}`; addHistory(`Deposited ₹${a}`);
     }
 
     function withdrawMoney(){
-      const a=Number(prompt("Withdraw amount:"));
-      if(isNaN(a)||a<=0) return alert("Invalid amount");
+      const a=Number(prompt(`Withdraw amount (₹${MIN_WITHDRAW}-₹${MAX_WITHDRAW}):`));
+      if(isNaN(a)||a<MIN_WITHDRAW||a>MAX_WITHDRAW) return alert("Withdraw outside allowed limits");
       if(a>users[currentUser].balance) return alert("Insufficient funds");
       users[currentUser].balance-=a; saveUsers();
-      menuMsg.textContent=`Withdrew ₹${a}`;
-      addHistory(`Withdrew ₹${a}`);
+      menuMsg.textContent=`Withdrew ₹${a}`; addHistory(`Withdrew ₹${a}`);
     }
 
-    function logout(){
-      currentUser=null;
-      menu.classList.add("hidden");
-      login.classList.remove("hidden");
+    function exportData(){
+      const data=JSON.stringify(users[currentUser],null,2);
+      const blob=new Blob([data],{type:"application/json"});
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);
+      a.download=`${currentUser}_atm_data.json`;
+      a.click();
     }
+
+    function logout(){ currentUser=null; sessionStorage.removeItem("atm_session"); menu.classList.add("hidden"); login.classList.remove("hidden"); }
   </script>
 </body>
 </html>
